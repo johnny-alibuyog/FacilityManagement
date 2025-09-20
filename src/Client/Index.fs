@@ -1,8 +1,10 @@
 module Index
 
 open Elmish
-open SAFE
 open FacilityManagement.Shared
+open Feliz.Shadcn
+open SAFE
+
 
 type State = {
     Todos: RemoteData<Todo list>
@@ -27,28 +29,20 @@ module State =
     let update message model =
 
         match message with
-
-        | SetInput value ->
+        | SetInput value -> 
             { model with Input = value }, Cmd.none
 
         | LoadTodos msg ->
-
             match msg with
-
             | Start() ->
-                let loadTodosCmd =
-                    Cmd.OfAsync.perform
-                        todosApi.get ()
-                        (Finished >> LoadTodos)
-
+                let loadTodosCmd = Cmd.OfAsync.perform todosApi.get () (Finished >> LoadTodos)
                 { model with Todos = model.Todos.StartLoading() }, loadTodosCmd
 
-            | Finished todos -> { model with Todos = Loaded todos }, Cmd.none
+            | Finished todos -> 
+                { model with Todos = Loaded todos }, Cmd.none
 
         | SaveTodo msg ->
-
             match msg with
-
             | Start todoText ->
                 let saveTodoCmd =
                     let todo = Todo.create todoText
@@ -57,15 +51,33 @@ module State =
                 { model with Input = "" }, saveTodoCmd
 
             | Finished todos ->
-                {
-                    model with
-                        Todos = RemoteData.Loaded todos
-                },
-                Cmd.none
+                { model with Todos = RemoteData.Loaded todos }, Cmd.none
 
 module View =
-
     open Feliz
+
+    let renderAccordion =
+        Shadcn.accordion [
+            accordion.type'.single
+            prop.children [
+                Shadcn.accordionItem [
+                    prop.value "item-1"
+                    prop.children [
+                        Shadcn.accordionTrigger "Is it accessible?"
+                        Shadcn.accordionContent "Yes. It adheres to the WAI-ARIA design pattern."
+                    ]
+                ]
+                Shadcn.accordionItem [
+                    prop.value "item-2"
+                    prop.children [
+                        Shadcn.accordionTrigger "Is it styled?"
+                        Shadcn.accordionContent "Yes. It comes with default styles that matches the other components & aesthetic.."
+                    ]
+                ]
+            ]
+        ]
+
+
     let renderTodoAction state dispatch =
         Html.div [
             prop.className "flex flex-col sm:flex-row mt-4 gap-4"
@@ -88,6 +100,12 @@ module View =
                     prop.onClick (fun _ -> dispatch (SaveTodo(Start state.Input)))
                     prop.text "Add"
                 ]
+                Shadcn.button [
+                    button.variant.default'
+                    prop.disabled (Todo.isValid state.Input |> not)
+                    prop.onClick (fun _ -> dispatch (SaveTodo(Start state.Input)))
+                    prop.text "Add Alt"
+                ]
             ]
         ]
 
@@ -99,13 +117,11 @@ module View =
                     prop.className "list-decimal ml-4 sm:ml-6"
                     prop.children [
                         match state.Todos with
-                        | NotStarted ->
-                            Html.text "Not Started."
+                        | NotStarted -> Html.text "Not Started."
 
-                        | Loading None ->
-                            Html.text "Loading..."
+                        | Loading None -> Html.text "Loading..."
 
-                        | Loading (Some todos) ->
+                        | Loading(Some todos) ->
                             for todo in todos do
                                 Html.li [
                                     prop.className "my-1 text-black text-base sm:text-lg break-words"
@@ -137,11 +153,9 @@ module View =
 
                 // Background div with image and glass effect
                 Html.div [
-                    prop.className "absolute inset-0 bg-cover bg-center bg-fixed bg-no-repeat
-                    bg-white/20 backdrop-blur-sm"
-                    prop.style [
-                        style.backgroundImageUrl "https://unsplash.it/1200/900?random"
-                    ]
+                    prop.className
+                        "absolute inset-0 bg-cover bg-center bg-fixed bg-no-repeat bg-white/20 backdrop-blur-sm"
+                    prop.style [ style.backgroundImageUrl "https://unsplash.it/1200/900?random" ]
                 ]
 
                 // Content container (the rest of your UI)
@@ -151,10 +165,9 @@ module View =
                         // Your existing content here
                         Html.a [
                             prop.href "https://safe-stack.github.io/"
-                            prop.className "absolute block ml-4 sm:ml-12 h-10 w-10 sm:h-12 sm:w-12 bg-teal-300 hover:cursor-pointer hover:bg-teal-400"
-                            prop.children [
-                                Html.img [ prop.src "/favicon.png"; prop.alt "Logo" ]
-                            ]
+                            prop.className
+                                "absolute block ml-4 sm:ml-12 h-10 w-10 sm:h-12 sm:w-12 bg-teal-300 hover:cursor-pointer hover:bg-teal-400"
+                            prop.children [ Html.img [ prop.src "/favicon.png"; prop.alt "Logo" ] ]
                         ]
 
 
@@ -162,13 +175,15 @@ module View =
                             prop.className "flex flex-col items-center justify-center h-full"
                             prop.children [
                                 Html.div [
-                                    prop.className "bg-white/20 backdrop-blur-lg p-4 sm:p-8 rounded-xl shadow-lg border border-white/30 mx-4 sm:mx-0 max-w-full sm:max-w-2xl"
+                                    prop.className
+                                        "bg-white/20 backdrop-blur-lg p-4 sm:p-8 rounded-xl shadow-lg border border-white/30 mx-4 sm:mx-0 max-w-full sm:max-w-2xl"
                                     prop.children [
                                         Html.h1 [
                                             prop.className "text-center text-3xl sm:text-5xl font-bold mb-3 p-2 sm:p-4"
                                             prop.text "Entheo Genesis"
                                         ]
                                         renderTodoList state dispatch
+                                        renderAccordion
                                     ]
                                 ]
                             ]

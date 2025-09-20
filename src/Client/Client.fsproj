@@ -16,5 +16,8 @@
     <ItemGroup>
         <ProjectReference Include="..\Shared\Shared.fsproj" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Feliz.Shadcn" Version="0.9.4" />
+    </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

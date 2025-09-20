@@ -4,22 +4,23 @@
 
 This is a **SAFE Stack** application (Saturn/Fable/Azure/F#) with a clear 3-tier architecture:
 
-- **`src/Shared/`**: F# domain models and API contracts shared between client/server
+- **`src/Shared/`**: F# domain models and API contracts shared between client/server  
 - **`src/Server/`**: Saturn web server with in-memory storage using F# modules
 - **`src/Client/`**: Fable React SPA using Elmish MVU pattern with Feliz UI library
 
-The client compiles F# to JavaScript via Fable, server runs on .NET 8, and both share identical domain logic from `Shared.fs`.
+The client compiles F# to JavaScript via Fable, server runs on .NET 8, and both share identical domain logic from `Shared.fs`. The project name is "Entheo Genesis" (visible in UI) but namespace is `FacilityManagement`.
 
 ## Critical Build System
 
 **Always use `dotnet run` from root** - never use `dotnet build` or `npm` directly. The `Build.fs` script orchestrates everything:
 
 - `dotnet run` → Concurrent server (watch) + client (Vite dev server) at http://localhost:8080
-- `dotnet run -- WatchRunTests` → Run tests in watch mode (server console + client at http://localhost:8081)
+- `dotnet run -- WatchRunTests` → Run tests in watch mode (server console + client at http://localhost:8081)  
 - `dotnet run -- Bundle` → Production build (server to `deploy/`, client bundled)
+- `dotnet run -- Azure` → Deploy to Azure using Farmer (requires authentication)
 - `dotnet run -- Format` → Fantomas code formatting
 
-The build uses **Paket** (not NuGet directly) - modify `paket.dependencies` for packages, then run restoration through build system.
+The build uses **Paket** (not NuGet directly) - modify `paket.dependencies` for packages, then run restoration through build system. Core dependencies: SAFE.Server ~> 5, SAFE.Client ~> 5, Expecto ~> 9.
 
 ## F# Patterns & Conventions
 
@@ -28,8 +29,9 @@ The build uses **Paket** (not NuGet directly) - modify `paket.dependencies` for 
 // Shared.fs - Always define API contracts as records + interfaces
 type ITodosApi = { get: unit -> Async<Todo list>; post: Todo -> Async<Todo list> }
 
-// Server.fs - Implement APIs as record values
+// Server.fs - Implement APIs as record values with SAFE.Api.make
 let todosApi ctx = { get = fun () -> async { ... }; post = fun todo -> async { ... } }
+let webApp = Api.make todosApi  // Auto-generates routes from interface
 ```
 
 ### Client State Management (Elmish MVU)
@@ -43,12 +45,29 @@ match state.Todos with
 | NotStarted -> // Initial
 | Loading (Some data) -> // Loading with cached data  
 | Loaded data -> // Success
+
+// API proxy generation from shared interface
+let todosApi = Api.makeProxy<ITodosApi> ()
 ```
 
 ### Server Module Organization
 - Use F# modules (not classes) for business logic: `module Storage = ...`
 - Keep mutable state minimal and localized (`ResizeArray` for demo data)
 - Saturn applications composed with computation expressions: `application { ... }`
+- API endpoints auto-generated from record interfaces using `Api.make`
+
+### UI Development with Feliz
+```fsharp
+// Use Feliz for type-safe HTML/CSS - no magic strings
+Html.div [
+    prop.className "flex flex-col sm:flex-row mt-4 gap-4"
+    prop.children [ /* ... */ ]
+]
+
+// Event handling with proper F# patterns
+prop.onKeyPress (fun ev -> if ev.key = "Enter" then dispatch msg)
+prop.onClick (fun _ -> dispatch msg)
+```
 
 ## Testing Strategy
 
@@ -81,6 +100,8 @@ open Expecto
 - **Shared Types**: Domain models in `Shared.fs` ensure type safety across client/server boundary  
 - **Asset Pipeline**: Client static assets in `src/Client/public/` served by Saturn's `use_static`
 - **CSS Framework**: Tailwind CSS configured via PostCSS, classes applied through Feliz properties
+- **Vite Configuration**: Client proxies `/api/*` requests to server on port 5000, client serves on port 8080
+- **HMR Support**: Client hot-reloads via Vite, server auto-restarts via `dotnet watch`, F# files ignored by Vite watcher
 
 ## Project Structure Rules
 
