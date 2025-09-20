@@ -1,9 +1,8 @@
-module FacilityManagement.Client.Tests
+module FacilityManagement.Client.Test
 
 open Fable.Mocha
-
-open Index
 open FacilityManagement.Shared
+open FacilityManagement.Client.Index
 open SAFE
 
 let client =
@@ -20,8 +19,8 @@ let client =
 
             Expect.equal
                 (state.Todos
-                 |> RemoteData.map List.head
-                 |> RemoteData.defaultValue (Todo.create ""))
+                |> RemoteData.map List.head
+                |> RemoteData.defaultValue (Todo.create ""))
                 newTodo
                 "Todo should equal new todo"
         )

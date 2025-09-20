@@ -1,5 +1,5 @@
 STORAGE: NONE
-RESTRICTION: == net8.0
+RESTRICTION: == net9.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
     Expecto (9.0.4)
@@ -179,16 +179,16 @@ NUGET
       Fable.Remoting.Client (>= 7.32 < 8.0)
       Fable.SimpleJson (>= 3.24)
       Feliz (>= 2.9 < 3.0)
-      FSharp.Core (>= 8.0.403 < 9.0)
+      FSharp.Core (>= 8.0.403)
       SAFE.Client.Utils (>= 5.0.1 < 6.0)
     SAFE.Client.Utils (5.0.1)
       Fable.Browser.Dom (>= 2.18.1)
       Fable.Remoting.Client (>= 7.32)
       Fable.SimpleJson (>= 3.24)
-      FSharp.Core (>= 8.0.403 < 9.0)
+      FSharp.Core (>= 8.0.403)
     SAFE.Server (5.1.2)
       Fable.Remoting.Giraffe (>= 5.21 < 6.0)
-      FSharp.Core (>= 8.0.403 < 9.0)
+      FSharp.Core (>= 8.0.403)
       SAFE.Server.Utils (>= 5.0 < 6.0)
       Saturn (>= 0.17 < 1.0)
     SAFE.Server.Utils (5.0)
